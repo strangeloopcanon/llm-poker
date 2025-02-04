@@ -1,22 +1,52 @@
 # README.md
 
-poker_eval
-----------
+# Game-Evals: Texas Hold’em with LLM Players
 
-A minimal Python package that hosts a Texas Hold ’em environment so multiple LLMs can
-play against each other. The environment handles:
+This repository hosts a minimal Texas Hold’em environment, with LLM-driven players, plus robust JSON parsing logic and straightforward or advanced showdown logic. You can run multi-hand simulations where two or more LLMs compete and produce valid moves.
 
-1. Dealing: each player receives hole cards, community cards dealt in the standard sequence (flop, turn, river).
-2. Action phases: we gather actions ("fold", "call", "raise") from each LLM in turn.
-3. Basic reliability checks: we confirm that the actions returned by the LLM are valid.
-   - If an invalid action is returned, we retry that LLM’s prompt.
-4. Single-pot awarding: The environment requests a JSON with the winner’s name. If there’s a tie, they should indicate a list of winners. If any contradiction occurs across LLM statements, it re-prompts them.
+## Table of Contents
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage Examples](#usage-examples)
+- [Blinds, Betting, and Showdown](#blinds-betting-and-showdown)
+- [Common Issues](#common-issues)
+- [License](#license)
 
-We skip blinds, side pots, advanced all-in logic, or actual system-level hand strength evaluation. The LLMs will internally track their best hand, bluffing strategy, etc. We simply ensure each action is legal and update the pot and call amount accordingly.
+---
 
-Install locally
----------------
-git clone <this repo> poker_eval cd poker_eval pip install -e .
+## Project Structure
+
+**Key files:**
+
+1. **`environment.py`**  
+   - Defines `PokerTable` (the environment).  
+   - Manages blinds, dealing, betting, and the final showdown.  
+   - Exports `simulate_poker_game(...)` as a convenience function.
+
+2. **`llm_player.py`**  
+   - A specialized player that queries an LLM for moves.  
+   - Uses pydantic or similar validation for JSON responses.  
+   - Has a built-in retry loop for malformed JSON or invalid actions.
+
+3. **`run.py`**  
+   - A sample driver script that configures logging and calls `simulate_poker_game`.
+
+---
+
+## Installation
+
+1. **Clone or download** this repository.
+2. **Activate** the virtual environment of your choice, or ensure you’re in a Python environment where you want to install the package.
+3. From **the root folder** (where `setup.py` is), run:
+   ```bash
+   pip install -e .
+   ```
+
+If you plan to use the optional CLI (poker-eval ...), ensure cli.py is referenced in setup.py under the entry_points. Then you can do:
+   ```bash
+poker-eval --help
+   ```
 
 
 Example usage
@@ -34,3 +64,17 @@ simulate_poker_game(
 
 Check that you have configured your LLM keys properly using the llm CLI.
 
+## Configuration
+LLM Keys: You must configure your LLM provider keys for the llm library (e.g. Anthropic, OpenAI).
+Example:
+```bash
+export OPENAI_API_KEY="sk-xxx"
+llm keys set openai
+or similarly for Anthropic.
+```
+Model Names: You can pass any recognized model alias from llm.models (e.g. gpt-4o, claude-3-5-haiku-latest).
+
+Then just
+```python
+python run.py
+```
