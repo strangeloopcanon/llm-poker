@@ -1,0 +1,93 @@
+# llm_player.py
+
+import json
+import re
+import logging
+from typing import List, Dict, Optional, Type
+import llm
+from pydantic import BaseModel, ValidationError, Field
+
+class ActionSchema(BaseModel):
+    action: str = Field(..., pattern="^(fold|call|raise)$")
+    raise_amount: Optional[int] = None
+
+class ShowdownSchema(BaseModel):
+    winner_names: List[str]
+
+def extract_json_snippet(text: str) -> str:
+    start = text.find('{')
+    end = text.rfind('}')
+    if start == -1 or end == -1 or end < start:
+        raise ValueError("No JSON object found in output.")
+    return text[start:end+1]
+
+def parse_llm_json(raw_text: str, model_class: Type[BaseModel]) -> BaseModel:
+    """
+    1) Extract JSON snippet from raw_text
+    2) Parse that snippet as JSON
+    3) Instantiate the provided pydantic model_class with the parsed dict
+    4) Return the validated object
+    """
+    snippet = extract_json_snippet(raw_text)
+    data = json.loads(snippet)
+    return model_class(**data)
+
+#######################################################################
+
+class LLMPlayer:
+    def __init__(self, name: str, model_id: str, stack: int = 10000):
+        self.name = name
+        self.model_id = model_id
+        self.stack = stack
+        self.hole_cards: List[str] = []
+        self.folded = False
+        self._model = llm.get_model(model_id)
+        self.logger = logging.getLogger(self.name)
+        self.logger.setLevel(logging.DEBUG)
+
+    def reset_for_new_hand(self):
+        self.hole_cards.clear()
+        self.folded = False
+
+    def request_action(
+        self,
+        community_cards: List[str],
+        pot: int,
+        call_amount: int,
+        min_raise: int,
+        game_history: str
+    ) -> Dict:
+        prompt_text = f"""
+You are {self.name} with {self.stack} chips.
+If the amount to call is 0, use "call" to represent a check.
+Never output "check" as an action. Only fold/call/raise.
+
+Hole cards: {self.hole_cards}
+Community cards: {community_cards}
+Pot: {pot}
+Amount to call: {call_amount}
+Minimum raise over current call: {min_raise}
+Game history: {game_history}
+
+Output VALID JSON ONLY, e.g.:
+{{
+  "action": "call",
+  "raise_amount": null
+}}
+No extra commentary.
+        """
+
+        for attempt in range(5):
+            resp = self._model.prompt(prompt_text)
+            raw_text = resp.text().strip()
+            self.logger.debug(f"Raw LLM action output (attempt {attempt+1}): {raw_text!r}")
+
+            try:
+                data = parse_llm_json(raw_text, ActionSchema)
+                # data is a validated ActionSchema object
+                return data.dict()  # or just return data if you prefer
+            except (ValueError, ValidationError) as e:
+                self.logger.warning(f"Parsing/validation error on attempt {attempt+1}: {e}")
+
+        raise RuntimeError(f"{self.name} gave too many invalid responses for request_action")
+
