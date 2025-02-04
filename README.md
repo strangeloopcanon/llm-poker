@@ -4,17 +4,6 @@
 
 This repository hosts a minimal Texas Hold’em environment, with LLM-driven players, plus robust JSON parsing logic and straightforward or advanced showdown logic. You can run multi-hand simulations where two or more LLMs compete and produce valid moves.
 
-## Table of Contents
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage Examples](#usage-examples)
-- [Blinds, Betting, and Showdown](#blinds-betting-and-showdown)
-- [Common Issues](#common-issues)
-- [License](#license)
-
----
-
 ## Project Structure
 
 **Key files:**
