@@ -1,5 +1,5 @@
 # README.md
-======================
+
 poker_eval
 ----------
 
@@ -10,13 +10,9 @@ play against each other. The environment handles:
 2. Action phases: we gather actions ("fold", "call", "raise") from each LLM in turn.
 3. Basic reliability checks: we confirm that the actions returned by the LLM are valid.
    - If an invalid action is returned, we retry that LLM’s prompt.
-4. Single-pot awarding: at showdown, the LLMs themselves decide who wins. The environment
-   requests a JSON with the winner’s name. If there’s a tie, they should indicate a list
-   of winners. If any contradiction occurs across LLM statements, it re-prompts them.
+4. Single-pot awarding: The environment requests a JSON with the winner’s name. If there’s a tie, they should indicate a list of winners. If any contradiction occurs across LLM statements, it re-prompts them.
 
-We skip blinds, side pots, advanced all-in logic, or actual system-level hand strength
-evaluation. The LLMs will internally track their best hand, bluffing strategy, etc.
-We simply ensure each action is legal and update the pot and call amount accordingly.
+We skip blinds, side pots, advanced all-in logic, or actual system-level hand strength evaluation. The LLMs will internally track their best hand, bluffing strategy, etc. We simply ensure each action is legal and update the pot and call amount accordingly.
 
 Install locally
 ---------------
