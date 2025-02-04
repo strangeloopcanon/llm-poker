@@ -43,7 +43,7 @@ class LLMPlayer:
         self.folded = False
         self._model = llm.get_model(model_id)
         self.logger = logging.getLogger(self.name)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.INFO)
 
     def reset_for_new_hand(self):
         self.hole_cards.clear()
@@ -77,7 +77,7 @@ Output VALID JSON ONLY, e.g.:
 No extra commentary.
         """
 
-        for attempt in range(5):
+        for attempt in range(5): # Should be while True: but changed to not have infinite loops.
             resp = self._model.prompt(prompt_text)
             raw_text = resp.text().strip()
             self.logger.debug(f"Raw LLM action output (attempt {attempt+1}): {raw_text!r}")

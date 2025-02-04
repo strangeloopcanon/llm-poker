@@ -19,7 +19,7 @@ def main(models, rounds, elimination_count, stack):
         rounds=rounds,
         elimination_count=elimination_count,
         starting_stack=stack,
-        min_raise=100
+        min_raise=some_value
     )
 
 if __name__ == "__main__":
