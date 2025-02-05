@@ -29,6 +29,8 @@ You must also configure your llm library with the API keys for whichever LLM mod
 llm keys set openai
 ```
 
+-----
+
 ## Quickstart Examples
 1. Running the Sample run.py
 ```bash
@@ -57,7 +59,9 @@ poker-eval [OPTIONS]
 --elimination-count/-e: Stop once only this many players remain (default 1).
 --stack/-s: Starting chip stack (default 10000).
 
+-----
+
 ## Known Limitations
-No side pots: Currently, if a player goes all-in, the environment doesn’t handle side pots.
-Manual environment checks: If the LLM returns “check” while facing a bet, the code interprets it as invalid and re-prompts.
-Fictitious ‘expert-level poker AI’: The LLM’s strategic brilliance is not guaranteed. This is more a demonstration environment than a truly advanced solver.
+- No side pots: Currently, if a player goes all-in, the environment doesn’t handle side pots.
+- Manual environment checks: If the LLM returns “check” while facing a bet, the code interprets it as invalid and re-prompts.
+- Fictitious ‘expert-level poker AI’: The LLM’s strategic brilliance is not guaranteed. This is more a demonstration environment than a truly advanced solver.
