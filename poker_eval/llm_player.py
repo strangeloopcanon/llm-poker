@@ -1,11 +1,10 @@
 # llm_player.py
 
 import json
-import re
-import logging
 from typing import List, Dict, Optional, Type
 import llm
 from pydantic import BaseModel, ValidationError, Field
+from .player import Player
 
 class ActionSchema(BaseModel):
     action: str = Field(..., pattern="^(fold|call|raise)$")
@@ -34,20 +33,22 @@ def parse_llm_json(raw_text: str, model_class: Type[BaseModel]) -> BaseModel:
 
 #######################################################################
 
-class LLMPlayer:
+class LLMPlayer(Player):
+    """
+    A poker player implementation that uses an LLM to make decisions.
+    """
     def __init__(self, name: str, model_id: str, stack: int = 10000):
-        self.name = name
-        self.model_id = model_id
-        self.stack = stack
-        self.hole_cards: List[str] = []
-        self.folded = False
-        self._model = llm.get_model(model_id)
-        self.logger = logging.getLogger(self.name)
-        self.logger.setLevel(logging.INFO)
+        """
+        Initialize an LLM-based poker player.
 
-    def reset_for_new_hand(self):
-        self.hole_cards.clear()
-        self.folded = False
+        Args:
+            name (str): The player's name
+            model_id (str): ID of the LLM model to use
+            stack (int, optional): Initial chip stack. Defaults to 10000.
+        """
+        super().__init__(name, stack)
+        self.model_id = model_id
+        self._model = llm.get_model(model_id)
 
     def request_action(
         self,
@@ -57,6 +58,22 @@ class LLMPlayer:
         min_raise: int,
         game_history: str
     ) -> Dict:
+        """
+        Request an action from the LLM player based on the current game state.
+
+        Args:
+            community_cards (List[str]): List of community cards
+            pot (int): Current pot size
+            call_amount (int): Amount needed to call
+            min_raise (int): Minimum raise amount
+            game_history (str): String representation of the game history
+
+        Returns:
+            Dict: Action dictionary with keys 'action' and 'raise_amount'
+            
+        Raises:
+            RuntimeError: If the LLM gives too many invalid responses
+        """
         prompt_text = f"""
 You are an expert-level poker AI tasked with making optimal decisions in a poker game. Your job is to WIN! WIN! You will be given the current game state and your goal is to determine the best action to take.
 
@@ -120,4 +137,3 @@ Output VALID JSON ONLY, e.g.:
                 self.logger.warning(f"Parsing/validation error on attempt {attempt+1}: {e}")
 
         raise RuntimeError(f"{self.name} gave too many invalid responses for request_action")
-
