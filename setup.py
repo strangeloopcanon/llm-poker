@@ -3,8 +3,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="poker-eval",
-    version="0.1.1",
+    name="llm-poker",
+    version="0.1.0",
     packages=find_packages(),
     install_requires=[
         "llm",
