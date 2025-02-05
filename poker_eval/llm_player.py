@@ -1,8 +1,6 @@
 # llm_player.py
 
 import json
-import re
-import logging
 from typing import List, Dict, Optional, Type
 import llm
 from pydantic import BaseModel, ValidationError, Field
