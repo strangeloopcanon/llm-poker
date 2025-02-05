@@ -4,6 +4,7 @@ import random
 import itertools
 from typing import List, Dict
 from .llm_player import LLMPlayer
+from .human_player import HumanPlayer
 
 RANKS = list(range(2, 15))  # 2..14 => 2..Ace
 SUITS = ["♣", "♦", "♥", "♠"]
@@ -343,20 +344,26 @@ def simulate_poker_game(
     model_names: List[str],
     rounds: int = 5,
     elimination_count: int = 1,
-    starting_stack: int = 10000
+    starting_stack: int = 10000,
+    human_player: bool = False
 ):
     """
     1) Build LLMPlayers
+    1a) If human_player=True, add a HumanPlayer
     2) Seat them at the multi-raise PokerTable
     3) Print each hand's log
     4) Print final standings
     """
-    from .llm_player import LLMPlayer
 
     players = []
     for i, m_name in enumerate(model_names):
         p = LLMPlayer(name=f"Player_{i+1}", model_id=m_name, stack=starting_stack)
         players.append(p)
+
+    if human_player:
+        # Create a human player and insert it into the list of players at a random position
+        random_position = random.randint(0, len(players))   
+        players.insert(random_position, HumanPlayer(name="Human", stack=starting_stack))
 
     table = PokerTable(players=players, min_raise=500, small_blind=50, big_blind=100)
 

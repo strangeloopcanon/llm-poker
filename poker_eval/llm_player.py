@@ -4,7 +4,7 @@ import json
 from typing import List, Dict, Optional, Type
 import llm
 from pydantic import BaseModel, ValidationError, Field
-from player import Player
+from .player import Player
 
 class ActionSchema(BaseModel):
     action: str = Field(..., pattern="^(fold|call|raise)$")

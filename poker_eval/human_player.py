@@ -1,11 +1,22 @@
 from typing import Dict, List
 from poker_eval.player import Player
 
-class Human_Player(Player):
+class HumanPlayer(Player):
     """
     A human player implementation that interacts through the command line.
     Inherits from the Player base class and implements interactive decision making.
     """
+
+    def __init__(self, name: str, stack: int = 10000):
+        """
+        Initialize a new human player.
+
+        Args:
+            name (str): The player's name
+            stack (int, optional): Initial chip stack. Defaults to 10000.
+        """
+        super().__init__(name, stack)
+        self.model_id: str = "Human"
     
     def request_action(
         self,
@@ -48,9 +59,9 @@ class Human_Player(Player):
             action = input("\nEnter your action (1/2/3): ").strip().lower()
 
             if action in ['1', 'fold']:
-                return {'action': 'fold'}
+                return {'action': 'fold', 'raise_amount': None}
             elif action in ['2', 'call']:
-                return {'action': 'call'}
+                return {'action': 'call', 'raise_amount': None}
             elif action in ['3', 'raise']:
                 while True:
                     try:
