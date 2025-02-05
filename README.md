@@ -40,6 +40,7 @@ Deals up to 5 rounds between multiple players: gpt-4o, claude-3-5-haiku-latest, 
 Uses elimination_count=0 so the game does not stop early (unless someone busts).
 The minimum raise is 500 chips.
 Logs each hand’s actions, culminating in a final standings table.
+
 2. Using the CLI
 If you installed with the included console script, you can do:
 
