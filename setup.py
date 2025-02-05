@@ -2,9 +2,12 @@
 
 from setuptools import setup, find_packages
 
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
 setup(
     name="llm-poker",
-    version="0.1.0",
+    version="0.1.1",
     packages=find_packages(),
     install_requires=[
         "llm",
@@ -17,6 +20,8 @@ setup(
         ],
     },
     description="Texas Hold'em environment with LLM players",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author="Rohit Krishnan",
     author_email="rohit.krishnan@gmail.com",
     url="http://www.strangeloopcanon.com",
