@@ -3,12 +3,12 @@
 
 A minimal Texas Hold’em environment that seats multiple **LLM-based players** (via the `llm` library) and manages everything from dealing hole cards to forced blinds, betting rounds, and a straightforward showdown.  
 
-- **Core features**:  
-  - **Blinds**: Each hand forces a small blind and a big blind, ensuring there’s money in the pot.  
-  - **Betting**: We query each LLM once per betting round, requesting an action in strict JSON form (`fold`, `call`, or `raise`).  
-  - **Local showdown logic**: The environment determines the best 5-card hand from each player’s 7 cards and awards the pot.  
-  - **Pydantic-based JSON validation**: The LLM responses are parsed and validated. If invalid, we retry.  
-  - **Optional CLI**: The `poker-eval` command can run multiple rounds using the specified LLMs.
+**Core features**:  
+- **Blinds**: Each hand forces a small blind and a big blind, ensuring there’s money in the pot.  
+- **Betting**: We query each LLM once per betting round, requesting an action in strict JSON form (`fold`, `call`, or `raise`).  
+- **Local showdown logic**: The environment determines the best 5-card hand from each player’s 7 cards and awards the pot.  
+- **Pydantic-based JSON validation**: The LLM responses are parsed and validated. If invalid, we retry.  
+- **Optional CLI**: The `poker-eval` command can run multiple rounds using the specified LLMs.
 
 -----
 
