@@ -12,18 +12,6 @@ A minimal Texas Hold’em environment that seats multiple **LLM-based players** 
 
 -----
 
-## Table of Contents
-1. [Installation](#installation)
-2. [Quickstart Examples](#quickstart-examples)
-3. [Project Structure](#project-structure)
-4. [Usage via CLI](#usage-via-cli)
-5. [Usage via Python (run.py)](#usage-via-python-runpy)
-6. [Key Files](#key-files)
-7. [Known Limitations](#known-limitations)
-8. [License](#license)
-
------
-
 ## Installation
 
 1. **Clone** this repository or download the files.
