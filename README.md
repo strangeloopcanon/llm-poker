@@ -29,7 +29,6 @@ You must also configure your llm library with the API keys for whichever LLM mod
 llm keys set openai
 ```
 
-
 ## Quickstart Examples
 1. Running the Sample run.py
 ```bash
