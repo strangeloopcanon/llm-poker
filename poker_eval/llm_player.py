@@ -58,23 +58,53 @@ class LLMPlayer:
         game_history: str
     ) -> Dict:
         prompt_text = f"""
+You are an expert-level poker AI tasked with making optimal decisions in a poker game. You will be given the current game state and your goal is to determine the best action to take.
+
+Here's the current game state:
+
+Game history: {game_history}
 You are {self.name} with {self.stack} chips.
-If the amount to call is 0, use "call" to represent a check.
-Never output "check" as an action. Only fold/call/raise.
 
 Hole cards: {self.hole_cards}
 Community cards: {community_cards}
 Pot: {pot}
 Amount to call: {call_amount}
 Minimum raise over current call: {min_raise}
-Game history: {game_history}
 
+Instructions:
+1. Analyze the given information carefully.
+2. Consider advanced poker concepts such as position, pot odds, implied odds, and opponent tendencies.
+3. Determine the optimal action: fold, call, or raise.
+4. If raising, calculate an appropriate raise amount.
+5. Output your decision in valid JSON format.
+
+Important rules:
+- If the amount to call is 0, use "call" to represent a check.
+- Never output "check" as an action. Only use fold/call/raise.
+- Ensure your output is in valid JSON format.
+
+Before making your final decision, wrap your thought process inside <poker_reasoning> tags. Consider the following aspects:
+- Evaluate hand strength using standard poker hand rankings
+- Calculate pot odds and compare them to the required call amount
+- Analyze position and betting patterns
+- Consider opponent tendencies based on game history
+- Perform a risk/reward analysis of different actions (fold, call, raise)
+
+After your analysis, provide your final decision in JSON format with two keys:
+- "action": Either "fold", "call", or "raise"
+- "raise_amount": An integer value if raising, or null if not raising
+
+Example output structure (do not copy this content, only the structure):
+<poker_reasoning>
+[Detailed reasoning of the poker situation]
+</poker_reasoning>
+
+Now, analyze the current game state and make your expert-level poker decision.
 Output VALID JSON ONLY, e.g.:
 {{
   "action": "call",
   "raise_amount": null
 }}
-No extra commentary.
         """
 
         for attempt in range(5): # Should be while True: but changed to not have infinite loops.

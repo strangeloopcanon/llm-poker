@@ -1,7 +1,7 @@
 # poker_eval/cli.py
 
 import click
-from .environment import simulate_poker_game
+from poker_eval.environment import simulate_poker_game
 
 @click.command()
 @click.option("--models", "-m", multiple=True, default=["gpt-4o"], help="LLM model names, can use multiple.")
@@ -18,8 +18,7 @@ def main(models, rounds, elimination_count, stack):
         model_names=list(models),
         rounds=rounds,
         elimination_count=elimination_count,
-        starting_stack=stack,
-        min_raise=some_value
+        starting_stack=stack
     )
 
 if __name__ == "__main__":

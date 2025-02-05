@@ -13,7 +13,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "poker-eval = game_evals.cli:main",  
+            "poker-eval = poker_eval.cli:main",  
         ],
     },
     description="Texas Hold'em environment with LLM-based players",
