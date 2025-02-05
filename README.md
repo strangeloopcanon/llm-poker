@@ -72,6 +72,5 @@ poker-eval [OPTIONS]
 
 ## Known Limitations
 No side pots: Currently, if a player goes all-in, the environment doesn’t handle side pots.
-Limited re-raises: We only do a single pass per betting round. A real Hold’em game might allow multiple raises in a round.
 Manual environment checks: If the LLM returns “check” while facing a bet, the code interprets it as invalid and re-prompts.
 Fictitious ‘expert-level poker AI’: The LLM’s strategic brilliance is not guaranteed. This is more a demonstration environment than a truly advanced solver.

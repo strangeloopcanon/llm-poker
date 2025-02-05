@@ -8,7 +8,6 @@ from .llm_player import LLMPlayer
 RANKS = list(range(2, 15))  # 2..14 => 2..Ace
 SUITS = ["♣", "♦", "♥", "♠"]
 
-
 def create_deck() -> List[str]:
     return [f"{r}{s}" for r in RANKS for s in SUITS]
 
@@ -18,15 +17,14 @@ def deal(deck: List[str], n: int) -> List[str]:
     return cards
 
 def card_rank(card: str) -> int:
-    """Parse the rank portion (e.g. '14♥' => 14)."""
-    # We find the first suit character, parse up to that as an int.
+    # e.g. '14♥' => 14
     for i, ch in enumerate(card):
         if ch in SUITS:
             return int(card[:i])
     return 0
 
 def card_suit(card: str) -> str:
-    """Parse the suit portion (e.g. '14♥' => '♥')."""
+    # e.g. '14♥' => '♥'
     for ch in card:
         if ch in SUITS:
             return ch
@@ -35,54 +33,31 @@ def card_suit(card: str) -> str:
 
 def score_best_5_of_7(cards: List[str]) -> tuple:
     """
-    A simple 5-card evaluator for 7-card sets (2 hole + 5 board).
-    Returns a tuple that can be compared to see who wins:
-      (category, tiebreak...)
-    where a bigger tuple is better.
-    
-    category order (roughly):
-      8 = straight flush
-      7 = four of a kind
-      6 = full house
-      5 = flush
-      4 = straight
-      3 = three of a kind
-      2 = two pair
-      1 = one pair
-      0 = high card
+    Minimal 7->5 card evaluator returning a comparable tuple: (category, freq_pattern, rank_pattern, sorted_ranks).
+    8=straight flush, 7=quads, 6=full house, 5=flush, 4=straight,
+    3=trips, 2=two pair, 1=pair, 0=high card.
     """
-    # We'll generate all 5-card combinations, pick the best.
-    # This is not the fastest approach for large scale, but it’s easy to read.
-    
+    import itertools
+    from collections import Counter
+
     def rank_5_cards(hand: List[str]) -> tuple:
-        # hand is exactly 5 cards
         ranks = sorted([card_rank(c) for c in hand], reverse=True)
         suits = [card_suit(c) for c in hand]
-
         is_flush = (len(set(suits)) == 1)
-        
+
         def is_straight(sorted_r: List[int]) -> bool:
-            # check consecutive
             for i in range(len(sorted_r) - 1):
                 if sorted_r[i] - sorted_r[i+1] != 1:
                     return False
             return True
-        
-        # Also handle the "5-4-3-2-A" special case if you want, but let's keep it simple.
+
         straight = is_straight(ranks)
-        
-        # Count duplicates
-        from collections import Counter
+
         ccount = Counter(ranks)
-        # sort by (count, rank) descending
         freq_sorted = sorted(ccount.items(), key=lambda x: (x[1], x[0]), reverse=True)
-        # freq pattern e.g. [4,1], [3,2], [3,1,1], [2,2,1], ...
         freq_pattern = [x[1] for x in freq_sorted]
         rank_pattern = [x[0] for x in freq_sorted]
-        
-        # Determine category
-        # 8 = straight flush, 7 = quads, 6 = full house, 5=flush, 4=straight
-        # 3=trip, 2=two pair, 1=one pair, 0=high card
+
         cat = 0
         if straight and is_flush:
             cat = 8
@@ -97,7 +72,6 @@ def score_best_5_of_7(cards: List[str]) -> tuple:
         elif 3 in freq_pattern:
             cat = 3
         else:
-            # check for pairs
             pair_count = freq_pattern.count(2)
             if pair_count == 2:
                 cat = 2
@@ -105,11 +79,9 @@ def score_best_5_of_7(cards: List[str]) -> tuple:
                 cat = 1
             else:
                 cat = 0
-        
-        # Return (category, freq_pattern, rank_pattern, sorted_r) as final tiebreak
-        # The freq_pattern and rank_pattern help compare e.g. KKK72 vs QQQAK, etc.
+
         return (cat, freq_pattern, rank_pattern, ranks)
-    
+
     best_val = (0, [], [], [])
     for combo in itertools.combinations(cards, 5):
         val = rank_5_cards(list(combo))
@@ -120,17 +92,11 @@ def score_best_5_of_7(cards: List[str]) -> tuple:
 
 class PokerTable:
     """
-    Minimal environment with forced blinds, internal showdown logic. 
-    No side pots, no advanced all-in logic.
+    Minimal environment with blinds, multi-raise logic, local showdown scoring.
+    No side pots or advanced all-in tracking beyond forced folding if short.
     """
 
-    def __init__(
-        self,
-        players,
-        min_raise: int = 100,
-        small_blind: int = 50,
-        big_blind: int = 100
-    ):
+    def __init__(self, players, min_raise=100, small_blind=50, big_blind=100):
         self.players = players
         self.min_raise = min_raise
         self.small_blind = small_blind
@@ -140,16 +106,13 @@ class PokerTable:
 
     def play_hand(self) -> str:
         """
-        1) Shuffle, reset players
-        2) Post blinds
-        3) Deal hole cards
-        4) 4 betting rounds (preflop, flop, turn, river)
-        5) If multiple remain -> showdown (use local scoring!)
-        Returns history string
+        Shuffle, post blinds, deal 2 hole cards, then 4 betting rounds
+        with multiple re-raises, ending in showdown if needed.
         """
         self.deck = create_deck()
         random.shuffle(self.deck)
 
+        # reset
         for p in self.players:
             p.reset_for_new_hand()
 
@@ -158,53 +121,87 @@ class PokerTable:
             if p.stack <= 0:
                 p.folded = True
 
-        # hole cards
+        # Deal hole cards
         for p in self.players:
             if p.stack > 0:
                 p.hole_cards = deal(self.deck, 2)
 
         pot = 0
-        call_amount = 0
         community_cards: List[str] = []
 
-        # post blinds
+        # Post blinds
         def seat_idx(offset):
             return (self.button_position + 1 + offset) % len(self.players)
 
         sb_idx = seat_idx(0)
         bb_idx = seat_idx(1)
-        
-        sb_p = self.players[sb_idx]
-        sb_amt = min(self.small_blind, sb_p.stack)
-        sb_p.stack -= sb_amt
-        pot += sb_amt
-        history += f"\n{sb_p.name} posts SB {sb_amt}."
 
-        bb_p = self.players[bb_idx]
-        bb_amt = min(self.big_blind, bb_p.stack)
-        bb_p.stack -= bb_amt
+        sb_player = self.players[sb_idx]
+        bb_player = self.players[bb_idx]
+
+        sb_amt = min(self.small_blind, sb_player.stack)
+        bb_amt = min(self.big_blind, bb_player.stack)
+
+        sb_player.stack -= sb_amt
+        pot += sb_amt
+        history += f"\n{sb_player.name} posts SB {sb_amt}."
+
+        bb_player.stack -= bb_amt
         pot += bb_amt
-        history += f"\n{bb_p.name} posts BB {bb_amt}."
+        history += f"\n{bb_player.name} posts BB {bb_amt}."
 
         call_amount = bb_amt
 
         def run_betting_round(stage_name: str):
             nonlocal pot, call_amount, history
-            seats_in_order = [
-                (bb_idx + 1 + i) % len(self.players)
-                for i in range(len(self.players))
+
+            # Gather active seats in standard seat order (start from sb->bb->etc).
+            # We'll define a circular list starting from the first to act (i.e., seat after big blind).
+            seats_in_order = []
+            total_players = len(self.players)
+            start_seat = (bb_idx + 1) % total_players
+            for i in range(total_players):
+                seats_in_order.append((start_seat + i) % total_players)
+
+            # Filter out folded or busted
+            active_seats = [
+                s for s in seats_in_order
+                if (not self.players[s].folded and self.players[s].stack > 0)
             ]
-            for seat in seats_in_order:
+
+            if not active_seats:
+                return  # Everyone folded or broke
+
+            # We'll track how many players have acted since the last raise.
+            # Once we pass all active players with no new raise, the betting ends.
+            current_highest_bet = call_amount
+            players_acted_since_raise = 0
+            idx = 0
+
+            while True:
+                # If only 1 seat remains, break
+                if len(active_seats) < 2:
+                    break
+
+                seat = active_seats[idx]
                 ply = self.players[seat]
                 if ply.folded or ply.stack <= 0:
+                    # remove them from active seats
+                    active_seats.remove(seat)
+                    if idx >= len(active_seats):
+                        idx = 0
+                    if len(active_seats) < 2:
+                        break
                     continue
-                
+
+                # prompt LLM for action
+                game_state = history + f"\n(betting round: {stage_name}, seat={seat+1})"
                 action_info = ply.request_action(
                     community_cards=community_cards,
                     pot=pot,
-                    call_amount=call_amount,
+                    call_amount=current_highest_bet,
                     min_raise=self.min_raise,
-                    game_history=history + f"\n(betting round: {stage_name}, seat={seat+1})"
+                    game_history=game_state
                 )
                 act = action_info["action"]
                 ramt = action_info["raise_amount"]
@@ -212,36 +209,68 @@ class PokerTable:
                 if act == "fold":
                     ply.folded = True
                     history += f"\n{ply.name} folds."
+                    active_seats.remove(seat)
+                    if len(active_seats) < 2:
+                        break
+                    # do not advance idx in case we removed the current seat
+                    if idx >= len(active_seats):
+                        idx = 0
+                    continue
+
                 elif act == "call":
-                    # must pay call_amount
-                    if ply.stack < call_amount:
+                    diff = current_highest_bet
+                    if ply.stack < diff:
                         # can't match => fold
                         ply.folded = True
-                        history += f"\n{ply.name} tries calling {call_amount} but lacks chips => folds."
+                        history += f"\n{ply.name} tries calling {diff} but lacks chips => folds."
+                        active_seats.remove(seat)
+                        if len(active_seats) < 2:
+                            break
+                        if idx >= len(active_seats):
+                            idx = 0
+                        continue
                     else:
-                        ply.stack -= call_amount
-                        pot += call_amount
-                        history += f"\n{ply.name} calls {call_amount}."
-                elif act == "raise":
-                    desired = ramt if ramt else (call_amount + self.min_raise)
-                    minimum_needed = call_amount + self.min_raise
-                    if desired < minimum_needed:
-                        desired = minimum_needed
-                    if desired > ply.stack:
-                        # can't afford
-                        ply.folded = True
-                        history += f"\n{ply.name} tries raising to {desired} but lacks chips => folds."
-                    else:
-                        ply.stack -= desired
-                        pot += desired
-                        call_amount = desired
-                        history += f"\n{ply.name} raises total to {desired}."
+                        ply.stack -= diff
+                        pot += diff
+                        history += f"\n{ply.name} calls {diff}."
+                        players_acted_since_raise += 1
 
-        # preflop
+                elif act == "raise":
+                    desired_total = ramt if ramt else (current_highest_bet + self.min_raise)
+                    minimum_needed = current_highest_bet + self.min_raise
+                    if desired_total < minimum_needed:
+                        desired_total = minimum_needed
+
+                    if desired_total > ply.stack:
+                        # can't afford that raise => fold
+                        ply.folded = True
+                        history += f"\n{ply.name} tries raising to {desired_total} but lacks chips => folds."
+                        active_seats.remove(seat)
+                        if len(active_seats) < 2:
+                            break
+                        if idx >= len(active_seats):
+                            idx = 0
+                        continue
+                    else:
+                        # Must pay desired_total
+                        ply.stack -= desired_total
+                        pot += desired_total
+                        current_highest_bet = desired_total
+                        history += f"\n{ply.name} raises total to {desired_total}."
+                        players_acted_since_raise = 0  # reset because new raise
+
+                # move to next seat
+                idx = (idx + 1) % len(active_seats)
+
+                # if we've gone around the table with no new raise, end
+                if players_acted_since_raise >= len(active_seats):
+                    break
+
+        # ********** PRE-FLOP **********
         run_betting_round("preflop")
         active = [p for p in self.players if not p.folded and p.stack > 0]
 
-        # flop
+        # ********** FLOP **********
         if len(active) > 1:
             flop_cards = deal(self.deck, 3)
             community_cards.extend(flop_cards)
@@ -249,7 +278,7 @@ class PokerTable:
             run_betting_round("flop")
             active = [p for p in active if not p.folded and p.stack > 0]
 
-        # turn
+        # ********** TURN **********
         if len(active) > 1:
             turn_card = deal(self.deck, 1)
             community_cards.extend(turn_card)
@@ -257,7 +286,7 @@ class PokerTable:
             run_betting_round("turn")
             active = [p for p in active if not p.folded and p.stack > 0]
 
-        # river
+        # ********** RIVER **********
         if len(active) > 1:
             river_card = deal(self.deck, 1)
             community_cards.extend(river_card)
@@ -265,21 +294,20 @@ class PokerTable:
             run_betting_round("river")
             active = [p for p in active if not p.folded and p.stack > 0]
 
-        # showdown or single winner
+        # Check for single winner or showdown
+        pot_before_showdown = pot
         if len(active) == 1:
             winner = active[0]
             winner.stack += pot
             history += f"\nOnly {winner.name} remains, wins pot of {pot}."
             pot = 0
         elif len(active) == 0:
-            # everyone folded at some point => pot unclaimed
             history += "\nAll folded => pot unclaimed."
         else:
-            # multiple remain => local showdown
+            # multiple remain => showdown
             best_val = None
             winners = []
             for p in active:
-                # 7 cards: p.hole_cards + community_cards
                 combined = p.hole_cards + community_cards
                 val = score_best_5_of_7(combined)
                 if best_val is None or val > best_val:
@@ -287,25 +315,25 @@ class PokerTable:
                     winners = [p]
                 elif val == best_val:
                     winners.append(p)
-            
             if len(winners) == 1:
                 w = winners[0]
                 w.stack += pot
                 history += f"\nShowdown: {w.name} wins pot of {pot}."
                 pot = 0
             else:
-                # tie => chop pot
                 share = pot // len(winners)
-                for w in winners:
-                    w.stack += share
-                history += f"\nShowdown tie among {[w.name for w in winners]}. Each gets {share}."
+                names = [ww.name for ww in winners]
+                for ww in winners:
+                    ww.stack += share
+                history += f"\nShowdown tie among {names}; each gets {share}."
                 pot = 0
 
-        # rotate button
+        # Rotate dealer button
         self.button_position = (self.button_position + 1) % len(self.players)
         return history
 
     def remove_busted(self):
+        # Mark folded anyone with 0 chips
         for p in self.players:
             if p.stack <= 0:
                 p.folded = True
@@ -318,10 +346,10 @@ def simulate_poker_game(
     starting_stack: int = 10000
 ):
     """
-    1) Build LLMPlayers from the model_names
-    2) Seat them at a PokerTable
-    3) Print out each hand's action log
-    4) Compare final stacks
+    1) Build LLMPlayers
+    2) Seat them at the multi-raise PokerTable
+    3) Print each hand's log
+    4) Print final standings
     """
     from .llm_player import LLMPlayer
 
@@ -330,19 +358,19 @@ def simulate_poker_game(
         p = LLMPlayer(name=f"Player_{i+1}", model_id=m_name, stack=starting_stack)
         players.append(p)
 
-    table = PokerTable(players=players, min_raise=100, small_blind=50, big_blind=100)
+    table = PokerTable(players=players, min_raise=500, small_blind=50, big_blind=100)
 
     for _round in range(rounds):
         alive = sum(not pl.folded and pl.stack > 0 for pl in players)
         if alive <= elimination_count:
             break
 
-        history = table.play_hand()
-        print(history, "\n----- END HAND -----\n")
+        hand_history = table.play_hand()
+        print(hand_history, "\n----- END HAND -----\n")
         table.remove_busted()
 
     # final standings
-    rank = sorted(players, key=lambda x: x.stack, reverse=True)
+    ranking = sorted(players, key=lambda x: x.stack, reverse=True)
     print("\n=== FINAL STANDINGS ===")
-    for i, r in enumerate(rank, start=1):
-        print(f"{i}. {r.name} ({r.model_id}): ${r.stack}")
+    for i, ply in enumerate(ranking, start=1):
+        print(f"{i}. {ply.name} ({ply.model_id}): ${ply.stack}")

@@ -58,7 +58,7 @@ class LLMPlayer:
         game_history: str
     ) -> Dict:
         prompt_text = f"""
-You are an expert-level poker AI tasked with making optimal decisions in a poker game. You will be given the current game state and your goal is to determine the best action to take.
+You are an expert-level poker AI tasked with making optimal decisions in a poker game. Your job is to WIN! WIN! You will be given the current game state and your goal is to determine the best action to take.
 
 Here's the current game state:
 
