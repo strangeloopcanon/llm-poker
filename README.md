@@ -14,15 +14,11 @@ A minimal Texas Hold’em environment that seats multiple **LLM-based players** 
 
 ## Installation
 
-1. **Clone** this repository or download the files.
-2. **Install** the package (in editable mode) from the project root (where `setup.py` is located):
+1. **Install** the package:
    ```bash
-   pip install -e .
+   pip install llm-poker
    ```
-3. **Verify** You should see llm-poker installed
-   ```bash
-   pip list | grep llm-poker
-   ```
+
 You must also configure your llm library with the API keys for whichever LLM models you plan to use (e.g., gpt-4o, Anthropic, etc.). For example:
 
 ```bash
