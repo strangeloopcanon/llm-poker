@@ -6,8 +6,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="llm-poker",
-    version="0.1.3",
+    name="llm_poker",
+    version="0.1.4",
     packages=find_packages(),
     install_requires=[
         "llm",
@@ -16,7 +16,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "poker-eval = poker_eval.cli:main",  
+            "llm_poker = llm_poker.cli:main",  
         ],
     },
     description="Texas Hold'em environment with LLM players",

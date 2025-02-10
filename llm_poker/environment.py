@@ -1,4 +1,4 @@
-# poker_eval/environment.py
+# llm_poker/environment.py
 
 import random
 import itertools

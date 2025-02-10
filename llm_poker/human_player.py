@@ -1,5 +1,5 @@
 from typing import Dict, List
-from poker_eval.player import Player
+from .player import Player
 
 class HumanPlayer(Player):
     """

@@ -1,5 +1,5 @@
 # README.md
-# llm-poker
+# llm_poker
 
 A minimal Texas Hold’em environment that seats multiple **LLM-based players** (via the `llm` library) and manages everything from dealing hole cards to forced blinds, betting rounds, and a straightforward showdown.  
 
@@ -8,7 +8,7 @@ A minimal Texas Hold’em environment that seats multiple **LLM-based players** 
 - **Betting**: We query each LLM once per betting round, requesting an action in strict JSON form (`fold`, `call`, or `raise`).  
 - **Local showdown logic**: The environment determines the best 5-card hand from each player’s 7 cards and awards the pot.  
 - **Pydantic-based JSON validation**: The LLM responses are parsed and validated. If invalid, we retry.  
-- **Optional CLI**: The `poker-eval` command can run multiple rounds using the specified LLMs.
+- **Optional CLI**: The `llm_poker` command can run multiple rounds using the specified LLMs.
 
 -----
 
@@ -16,7 +16,7 @@ A minimal Texas Hold’em environment that seats multiple **LLM-based players** 
 
 1. **Install** the package:
    ```bash
-   pip install llm-poker
+   pip install llm_poker
    ```
 
 You must also configure your llm library with the API keys for whichever LLM models you plan to use (e.g., gpt-4o, Anthropic, etc.). For example:
@@ -41,7 +41,7 @@ Logs each hand’s actions, culminating in a final standings table.
 If you installed with the included console script, you can do:
 
 ```bash
-poker-eval --models gpt-4o --models claude-3-5-haiku-latest --rounds 5
+llm_poker --models gpt-4o --models claude-3-5-haiku-latest --rounds 5
 ```
 This deals 5 rounds of heads-up between gpt-4o and claude-3-5-haiku-latest.
 
@@ -49,7 +49,7 @@ This deals 5 rounds of heads-up between gpt-4o and claude-3-5-haiku-latest.
 Once installed, you have access to:
 
 ```bash
-poker-eval [OPTIONS]
+llm_poker [OPTIONS]
 ```
 --models/-m: Multiple model names or aliases recognized by llm (defaults to ["gpt-4o"]).
 --rounds/-r: How many hands to deal (default 3).

@@ -1,7 +1,7 @@
-# poker_eval/cli.py
+# llm_poker/cli.py
 
 import click
-from poker_eval.environment import simulate_poker_game
+from llm_poker.environment import simulate_poker_game
 
 @click.command()
 @click.option("--models", "-m", multiple=True, default=["gpt-4o"], help="LLM model names, can use multiple.")
@@ -13,7 +13,7 @@ def main(models, rounds, elimination_count, stack, human_player):
     """
     CLI to run a multi-LLM Texas Hold'em simulation.
     Example:
-      poker-eval --models gpt-4o --models deepseek-chat --rounds 5
+      llm_poker --models gpt-4o --models deepseek-chat --rounds 5
     """
     simulate_poker_game(
         model_names=list(models),
