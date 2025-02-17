@@ -28,11 +28,11 @@ llm keys set openai
 -----
 
 ## Quickstart Examples
-1. Running the Sample run.py
+1. Just run run.py
 ```bash
 python run.py
 ```
-Deals up to 5 rounds between multiple players: gpt-4o, claude-3-5-haiku-latest, claude-3-5-sonnet-latest, deepseek-chat.
+Deals up to 5 rounds between multiple players: gpt-4o, claude-3-5-haiku-latest, claude-3-5-sonnet-latest, deepseek-reasoner.
 Uses elimination_count=0 so the game does not stop early (unless someone busts).
 The minimum raise is 500 chips.
 Logs each hand’s actions, culminating in a final standings table.
@@ -41,7 +41,14 @@ Logs each hand’s actions, culminating in a final standings table.
 If you installed with the included console script, you can do:
 
 ```bash
-llm_poker --models gpt-4o --models claude-3-5-haiku-latest --rounds 5
+llm_poker --models chatgpt-4o-latest \
+          --models gemini-2.0-flash-thinking-exp-01-21 \
+          --models claude-3-5-sonnet-latest \
+          --models claude-3-5-haiku-latest \
+          --models deepseek-reasoner \
+          --rounds 5 \
+          --elimination-count 0 \
+          --stack 10000
 ```
 This deals 5 rounds of heads-up between gpt-4o and claude-3-5-haiku-latest.
 
