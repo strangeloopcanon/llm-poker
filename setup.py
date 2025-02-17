@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="llm_poker",
-    version="0.1.10",
+    version="0.1.11",
     packages=find_packages(),
     install_requires=[
         "llm",
