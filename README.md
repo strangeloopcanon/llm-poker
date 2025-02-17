@@ -41,15 +41,6 @@ Logs each hand’s actions, culminating in a final standings table.
 If you installed with the included console script, you can do:
 
 ```bash
-llm_poker --models chatgpt-4o-latest \
-          --models gemini-2.0-flash-thinking-exp-01-21 \
-          --models claude-3-5-sonnet-latest \
-          --models claude-3-5-haiku-latest \
-          --models deepseek-reasoner \
-          --rounds 5 \
-          --elimination-count 0 \
-          --stack 10000
-
 llm_poker --models "chatgpt-4o-latest gemini-2.0-flash-thinking-exp-01-21 claude-3-5-sonnet-latest claude-3-5-haiku-latest deepseek-reasoner" --elimination-count 0 --stack 10000
 
 ```
