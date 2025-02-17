@@ -97,7 +97,7 @@ class PokerTable:
     No side pots or advanced all-in tracking beyond forced folding if short.
     """
 
-    def __init__(self, players, min_raise=100, small_blind=50, big_blind=100):
+    def __init__(self, players, min_raise=500, small_blind=100, big_blind=200):
         self.players = players
         self.min_raise = min_raise
         self.small_blind = small_blind
