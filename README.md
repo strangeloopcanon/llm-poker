@@ -49,6 +49,9 @@ llm_poker --models chatgpt-4o-latest \
           --rounds 5 \
           --elimination-count 0 \
           --stack 10000
+
+llm_poker --models "chatgpt-4o-latest gemini-2.0-flash-thinking-exp-01-21 claude-3-5-sonnet-latest claude-3-5-haiku-latest deepseek-reasoner" --elimination-count 0 --stack 10000
+
 ```
 This deals 5 rounds of heads-up between gpt-4o and claude-3-5-haiku-latest.
 
