@@ -126,6 +126,7 @@ class PokerTable:
         for p in self.players:
             if p.stack > 0:
                 p.hole_cards = deal(self.deck, 2)
+                history += f"\n{p.name} hole cards: {p.hole_cards}"
 
         pot = 0
         community_cards: List[str] = []
@@ -310,6 +311,7 @@ class PokerTable:
             winners = []
             for p in active:
                 combined = p.hole_cards + community_cards
+                history += f"\nAt showdown, {p.name} hole cards: {p.hole_cards}"
                 val = score_best_5_of_7(combined)
                 if best_val is None or val > best_val:
                     best_val = val
