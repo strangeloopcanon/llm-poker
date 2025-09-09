@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm_poker"
+version = "0.1.14"
+description = "Texas Hold'em environment with LLM players"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{ name = "Rohit Krishnan", email = "rohit.krishnan@gmail.com" }]
+dependencies = ["llm", "click", "pydantic"]
+
+[project.urls]
+Homepage = "https://github.com/strangeloopcanon/llm-poker"
+
+[project.scripts]
+llm_poker = "llm_poker.cli:main"

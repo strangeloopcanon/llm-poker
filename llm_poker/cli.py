@@ -4,7 +4,7 @@ import click
 from llm_poker.environment import simulate_poker_game
 
 @click.command()
-@click.option("--models", "-m", default=["gpt-4o"], help="Space-separated model names.")
+@click.option("--models", "-m", default="gpt-5", help="Space-separated model names.")
 @click.option("--rounds", "-r", default=3, help="Number of rounds/hands to deal.")
 @click.option("--elimination-count", "-e", default=1, help="Stop when only this many players remain.")
 @click.option("--stack", "-s", default=10000, help="Starting stack for each player.")
@@ -16,9 +16,9 @@ def main(models, rounds, elimination_count, stack, human_player):
       llm_poker --models gpt-4o deepseek-chat --rounds 5
     """
     model_list = models.strip().split()
-    # If user doesn’t supply anything, fall back to a default
+    # If user doesn’t supply anything, fall back to a modern default
     if not model_list:
-        model_list = ["gpt-4o"]
+        model_list = ["gpt-5"]
 
     simulate_poker_game(
         model_names=model_list,

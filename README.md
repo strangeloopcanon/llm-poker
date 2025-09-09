@@ -32,7 +32,7 @@ llm keys set openai
 ```bash
 python run.py
 ```
-Deals up to 5 rounds between multiple players: gpt-4o, claude-3-5-haiku-latest, claude-3-5-sonnet-latest, deepseek-reasoner.
+Deals up to 5 rounds between multiple players: gpt-5, claude-4-sonnet, gemini-2.5-pro, deepseek-reasoner.
 Uses elimination_count=0 so the game does not stop early (unless someone busts).
 The minimum raise is 500 chips.
 Logs each hand’s actions, culminating in a final standings table.
@@ -41,10 +41,10 @@ Logs each hand’s actions, culminating in a final standings table.
 If you installed with the included console script, you can do:
 
 ```bash
-llm_poker --models "chatgpt-4o-latest gemini-2.0-flash-thinking-exp-01-21 claude-3-5-sonnet-latest claude-3-5-haiku-latest deepseek-reasoner" --elimination-count 0 --stack 10000
+llm_poker --models "gpt-5 claude-4-sonnet gemini-2.5-pro deepseek-reasoner" --elimination-count 0 --stack 10000
 
 ```
-This deals 5 rounds of heads-up between gpt-4o and claude-3-5-haiku-latest.
+This deals 5 rounds of heads-up between gpt-5 and claude-4-sonnet.
 
 
 Once installed, you have access to:
@@ -52,7 +52,7 @@ Once installed, you have access to:
 ```bash
 llm_poker [OPTIONS]
 ```
---models/-m: Multiple model names or aliases recognized by llm (defaults to ["gpt-4o"]).
+--models/-m: Multiple model names or aliases recognized by llm (defaults to "gpt-5").
 --rounds/-r: How many hands to deal (default 3).
 --elimination-count/-e: Stop once only this many players remain (default 1).
 --stack/-s: Starting chip stack (default 10000).

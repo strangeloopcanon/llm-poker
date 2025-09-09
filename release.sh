@@ -21,6 +21,16 @@ fi
 # Update version in setup.py
 sed -i '' "s/version=\"$CURRENT_VERSION\"/version=\"$NEW_VERSION\"/" setup.py
 
+# Update version in pyproject.toml if present
+if [ -f pyproject.toml ]; then
+  sed -i '' "s/^version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" pyproject.toml || true
+fi
+
+# Update version in package __init__
+if [ -f llm_poker/__init__.py ]; then
+  sed -i '' "s/__version__ = \"$CURRENT_VERSION\"/__version__ = \"$NEW_VERSION\"/" llm_poker/__init__.py || true
+fi
+
 echo "📌 Version bumped: $CURRENT_VERSION → $NEW_VERSION"
 
 # Commit and tag the version in Git
@@ -35,6 +45,6 @@ echo "🛠 Building new distribution..."
 python -m build  # Instead of python setup.py sdist bdist_wheel
 
 echo "📦 Uploading to PyPI..."
-twine upload dist/*
+python -m twine upload dist/*
 
 echo "✅ Release complete: v$NEW_VERSION"
